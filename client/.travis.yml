@@ -1,0 +1,19 @@
+sudo: required
+services:
+   - docker
+
+before_install:
+   - docker build -t narendragnv/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    -docker run narendragnv/react-test npm test -- --coverage
+after_success:
+    -docker build -t narendragnv/multi-client ./client
+    -docker build -t narendragnv/multi-nginx ./ngnix
+    -docker build -t narendragnv/multi-server ./server
+    -docker build -t narendragnv/multi-worked ./worker
+    -echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    -docker push narendragnv/multi-client
+    -docker push narendragnv/multi-nginx
+    -docker push narendragnv/multi-server
+    -docker push narendragnv/multi-worker
